@@ -25,13 +25,13 @@ var element = new ( function(){
 	}
 
 	this.addOption = function(obj, arr){
-	    //isArray?
+		//isArray?
 		if(isArray(arr)){
 			for(var i=0; i < arr.length; i++){
 				var opt = this.create('option', {value: arr[i], text: arr[i]});
 				this.appendChild(obj, [opt]);
 			}
-		//isHash?	
+		//isHash?
 		}else{
 			for(var i in arr){
 				var opt = this.create('option', {value: i, text: arr[i]});
@@ -48,6 +48,7 @@ var element = new ( function(){
 		return select;
 	}
 
+	//Useless. Remove in next version
 	this.getChilds = function(obj){
 		var childs = new Array();
 		for(var i=0; i < obj.childNodes.length; i++){
