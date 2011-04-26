@@ -20,7 +20,7 @@ Result::
     
     <select id="show"></select>
 
-::
+Second::
     
     var select2 = element.create('select', {id: 'show2'});
 
@@ -153,7 +153,7 @@ Result::
         <span class="spanclass"></span>
     </div>
 
-::
+Now insert after::
     
     element.insert(select2, text, true); // Move text node from li to div
 
@@ -225,7 +225,7 @@ Returns first returned value if third parameter passed. If called function not r
 anything returns true after all elements will be processed.::
     
     //Function that return hash with form data. 
-    /* This function is a part of Anicat and distributed under `its license <http://anicat.net/LICENSE>`.
+    /* This function is a part of Anicat and distributed under its license(http://anicat.net/LICENSE).
      * May become part of element.js in future.
      */
     function getFormData(form){
