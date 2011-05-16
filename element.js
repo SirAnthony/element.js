@@ -48,15 +48,6 @@ var element = new ( function(){
 		return select;
 	}
 
-	//Useless. Remove in next version
-	this.getChilds = function(obj){
-		var childs = new Array();
-		for(var i=0; i < obj.childNodes.length; i++){
-			childs.push(obj.childNodes[i]);
-		}
-		return childs;
-	}
-
 	this.removeAllChilds = function(el){
 		if(!el)
 			return;
