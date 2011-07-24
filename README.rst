@@ -12,7 +12,8 @@ element.create
 
 Creates new dom element and returns it.
 
-Takes two arguments: tag name and element parameters as hash.::
+Takes three arguments.
+First two required arguments: tag name and element parameters as hash::
     
     var select = element.create('select', {id: 'show', onchange: function(){alert();}});
 
@@ -29,10 +30,23 @@ Result::
     <select id="show2"></select>
 
 innerText property can be used as element text.
-If tag name is empty string it will creates text node.::
+If tag name is empty string it will creates text node::
     
     var text = element.create('', {innerText: 'Hello world!'});
 
+Last argument if given passed to element.appendChild as second parameter with created element
+as first parameter::
+
+    var temp = element.create('div', {className: 'example'}, [{'p': {}}, [{'span': {}}, {'span': {}}]])
+
+Result::     
+
+    <div class=​"example">​
+        <p>​
+            <span>​</span>​
+            <span>​</span>​
+        </p>​
+    </div>​
 
 element.addOption
 ----------------------------
@@ -41,7 +55,7 @@ Adds options to the select element.
 
 Takes two arguments: dom element and array/hash.
 
-If second argument is array it creates options with the same value and text.::
+If second argument is array it creates options with the same value and text::
     
     var opts = new Array(1,2,3);
     
@@ -55,7 +69,7 @@ Result::
         <option value="3">3</option>
     </select>
 
-If second argument is hash it creates options with the value equal hash key and text equal hash value.::
+If second argument is hash it creates options with the value equal hash key and text equal hash value::
     
     var opts = {1: 'one', 2: 'two', 3: 'three'};
     
@@ -69,13 +83,14 @@ Result::
         <option value="3">three</option>
     </select>
 
+If first element is False it returns option objects array instead of appending.
 
 element.getSelected
 ----------------------------
 
 Returns index of selected option.
 
-Takes one argument: select element.::
+Takes one argument: select element::
     
     select2.childNodes[1].selected = true;
     
@@ -92,7 +107,7 @@ Takes two arguments: dom element and array with elements.
 if array contains another element arrays function will be recursively called with
 this arrays as second parameters and previous element as first parameter.
 Hash with tag name as key and parameters hash as value can be used for 
-dynamic element creation.::
+dynamic element creation::
     
     var div = element.create('div');
     element.appendChild(div, [
@@ -132,7 +147,7 @@ Takes three arguments: base dom element, dom element which must be inserted
 before/afer base element and optional boolean parameter which indicates that 
 element must be inserted after base element.
 
-Second element can be hash which works like in appendChild.::
+Second element can be hash which works like in appendChild::
     
     element.insert(select2, {'p': {innerText: 'New text before select.'}});
 
@@ -181,7 +196,7 @@ element.removeAllChilds
 
 Removes all child nodes of element.
 
-Takes one argument: dom element.::
+Takes one argument: dom element::
     
     element.removeAllChilds(select);
 
@@ -195,7 +210,7 @@ element.remove
 
 Removes dom element and all its child nodes.
 
-Takes one argument: dom element.::
+Takes one argument: dom element::
     
     element.remove(select2);
 
@@ -222,7 +237,7 @@ Takes three arguments: function to call, dom element which nodes will be used
 and optional boolean parameter which indicates that function must return some value.
 
 Returns first returned value if third parameter passed. If called function not returns 
-anything returns true after all elements will be processed.::
+anything returns true after all elements will be processed::
     
     //Function that return hash with form data. 
     /* This function is a part of Anicat and distributed under its license(http://anicat.net/LICENSE).
@@ -249,6 +264,14 @@ anything returns true after all elements will be processed.::
 	   element.downTree(f, form);
 	   return formData;
     }
+
+element.getOffset
+----------------------------
+
+Takes two arguments: dom element and element on which is calculated offset.
+Returns: object with two parameters: top and left which are element offset. 
+If second parameter not passed offset is calculated relative to body element.
+  
 
 Additions
 ----------------------------

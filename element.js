@@ -1,6 +1,7 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 0.99
+// v. 1.0 
 // (c) 2011 SirAnthony <anthony at adsorbtion.org>
+// http://github.com/SirAnthony/element.js/
 
 var element = new ( function(){
 
@@ -25,19 +26,18 @@ var element = new ( function(){
 	}
 
 	this.addOption = function(obj, arr){
-		//isArray?
-		if(isArray(arr)){
-			for(var i=0; i < arr.length; i++){
-				var opt = this.create('option', {value: arr[i], text: arr[i]});
-				this.appendChild(obj, [opt]);
-			}
-		//isHash?
-		}else{
-			for(var i in arr){
-				var opt = this.create('option', {value: i, text: arr[i]});
-				this.appendChild(obj, [opt]);
-			}
+		var opts = new Array();
+		if(isArray(arr)){ //isArray?
+			for(var i=0; i < arr.length; i++)
+				opts.push(this.create('option', {value: arr[i], text: arr[i]}));
+		}else{//isHash?
+			for(var i in arr)
+				opts.push(this.create('option', {value: i, text: arr[i]}));
 		}
+		if(obj)
+			this.appendChild(obj, opts);
+		else
+			return opts;
 	}
 
 	this.getSelected = function(obj){
@@ -49,25 +49,24 @@ var element = new ( function(){
 	}
 
 	this.removeAllChilds = function(el){
-		if(!el)
-			return;
+		if(!el) return;
 		while(el.hasChildNodes()){
 			el.removeChild(el.lastChild);
 		}
 	}
 
-	this.create = function(elem, params){
+	this.create = function(elem, params, childs){
 		if(!elem || elem == '') elem = 'text';
 		var elm = document.createElement(elem);
-		for (var i in params){ 
+		for (var i in params)
 			elm[i] = params[i];
-		}
+		if(childs)
+			this.appendChild(elm, childs);
 		return elm;
 	}
 
 	this.remove = function(elem){
-		if(!elem)
-			return;
+		if(!elem) return;
 		if(isArray(elem)){
 			for(var el in elem)
 				this.remove(elem[el]);
@@ -75,7 +74,7 @@ var element = new ( function(){
 			this.removeAllChilds(elem);
 			if(elem.parentNode)
 			    elem.parentNode.removeChild(elem);
-		}	
+		}
 	}
 
 	this.appendChild = function(obj, arr){
@@ -114,16 +113,17 @@ var element = new ( function(){
 		var ins = next ? obj.nextSibling : obj
 		obj.parentNode.insertBefore(elem, ins);
 	}
-
-	//Not working correctly yet.
+	
 	this.getOffset = function(obj, parent){
+		if(!obj) return;
 		parent = parent ? parent : document.body;
 		var el = obj;
-		var offset = {top: 0, left: 0};
-		while(el.parentNode.parentNode != parent){
-			el = el.parentNode;
-			offset.top += el.offsetTop;
-			offset.left += el.offsetLeft;
+		var offset = {top: el.offsetTop, left: el.offsetLeft};
+		if((el = el.offsetParent) && el != parent){
+			do {
+				offset.top += el.offsetTop;
+				offset.left += el.offsetLeft;
+			} while(el.offsetParent != parent && (el = el.offsetParent));
 		}
 		return offset;
 	}
