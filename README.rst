@@ -48,12 +48,20 @@ Result::
         </p>
     </div>
 
+If second parameter have `choices` key, it will be processed as list of
+options, i.e. its contents will be passed to element.addOption function
+as crerated element as first parameter, content of `choices` as second
+parameter and content of `value` as third parameter.
+
+
 element.addOption
 ----------------------------
 
 Adds options to the select element.
 
-Takes two arguments: dom element and array/hash.
+Takes three arguments: dom element, array/hash of options and optional
+array of selected options keys, which marks coincident options as
+`selected`.
 
 If second argument is array it creates options with the same value and text::
 
@@ -282,6 +290,6 @@ Additions
 
 Along with the class comes additional functions:
 
-isElement, isArray, isHash, isFunction, isString, isNumber, isUndef
+isElement, isArray, isHash, isFunction, isString, isNumber, isError, isUndef
 
 This functions takes one argument and returns true if this variable has a specific type.

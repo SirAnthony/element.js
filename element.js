@@ -1,5 +1,5 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.0.2
+// v. 1.0.4
 // (c) 2011 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
 
@@ -25,14 +25,28 @@ var element = new ( function(){
         if(er) return true;
     }
 
-    this.addOption = function(obj, arr){
+    this.addOption = function(obj, arr, sel){
         var opts = new Array();
+        var selected = null;
+        if(isArray(sel)) selected = sel;
         if(isArray(arr)){ //isArray?
-            for(var i=0; i < arr.length; i++)
-                opts.push(this.create('option', {value: arr[i], text: arr[i]}));
+            for(var i=0; i < arr.length; i++){
+                if(isArray(arr[i]) && arr[i].length == 2)
+                    opts.push(this.create('option', {value: arr[i][0], text: arr[i][1]}));
+                else
+                    opts.push(this.create('option', {value: arr[i], text: arr[i]}));
+            }
         }else{//isHash?
             for(var i in arr)
                 opts.push(this.create('option', {value: i, text: arr[i]}));
+        }
+        if(selected){
+            for(var i=0; i < opts.length; i++){
+                for(var j=0; j < selected.length; j++){
+                    if(opts[i].value == selected[j])
+                        opts[i].selected = 'selected';
+                }
+            }
         }
         if(obj)
             this.appendChild(obj, opts);
@@ -58,8 +72,12 @@ var element = new ( function(){
     this.create = function(elem, params, childs){
         if(!elem || elem == '') elem = 'text';
         var elm = document.createElement(elem);
-        for (var i in params)
-            elm[i] = params[i];
+        for(var i in params){
+            if(i == 'choices')
+                this.addOption(elm, params[i], params['value']);
+            else
+                elm[i] = params[i];
+        }
         if(childs)
             this.appendChild(elm, childs);
         return elm;
@@ -155,6 +173,8 @@ function isHash(object) {
 function isFunction(object){return typeof object == "function";}
 function isString(object){return typeof object == "string";}
 function isNumber(object){return typeof object == "number";}
+function isError(object){return object instanceof Error ||
+    (typeof e === 'object' && objectToString(e) === '[object Error]');}
 function isUndef(object){return typeof object == "undefined";}
 
 element.init();
