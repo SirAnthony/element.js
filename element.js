@@ -1,5 +1,5 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.0.4
+// v. 1.0.5
 // (c) 2011 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
 
@@ -28,7 +28,11 @@ var element = new ( function(){
     this.addOption = function(obj, arr, sel){
         var opts = new Array();
         var selected = null;
-        if(isArray(sel)) selected = sel;
+        if(isArray(sel))
+            selected = sel;
+        else if(isString(sel))
+            selected = new Array(sel);
+
         if(isArray(arr)){ //isArray?
             for(var i=0; i < arr.length; i++){
                 if(isArray(arr[i]) && arr[i].length == 2)
@@ -139,6 +143,23 @@ var element = new ( function(){
                 el = this.create(key, elem[key]);
             }
             elem = el;
+        }else if(isArray(elem)){
+            var el = elem.shift();
+            elem = elem.shift();
+            if(isElement(el)){
+                element.appendChild(el, elem);
+                elem = el;
+            }else if(isHash(el)){
+                for(var i in el)
+                    if(el.hasOwnProperty(i)){
+                        elem = this.create(i, el[i], elem)
+                        break;
+                    }
+            }else if(isString(el)){
+                elem = this.create(el, null, elem)
+            }else{
+                throw new Error(el + ' is not element.');
+            }
         }
         var ins = next ? obj.nextSibling : obj
         obj.parentNode.insertBefore(elem, ins);

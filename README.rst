@@ -183,6 +183,11 @@ Result::
         <span class="spanclass"></span>
     </div>
 
+Also second element can be an array for tree creation. In this case its
+first element will be processed as inserted element and second element
+will be appended to it. All next array elements will be discarded, many
+first-level elements insert not supported yet.
+
 Now insert after::
 
     element.insert(select2, text, true); // Move text node from li to div
