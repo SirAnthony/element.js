@@ -34,8 +34,8 @@ If tag name is empty string it will creates text node::
 
     var text = element.create('', {innerText: 'Hello world!'});
 
-Last argument if given passed to element.appendChild as second parameter with created element
-as first parameter::
+Last argument if given passed to element.appendChild as second parameter
+with created element as first parameter::
 
     var temp = element.create('div', {className: 'example'}, ['p', [{'span': {className: 'span'}}, 'span']])
 
@@ -63,7 +63,8 @@ Takes three arguments: dom element, array/hash of options and optional
 array of selected options keys, which marks coincident options as
 `selected`.
 
-If second argument is array it creates options with the same value and text::
+If second argument is array it creates options with the same value and
+text::
 
     var opts = new Array(1,2,3);
 
@@ -77,7 +78,8 @@ Result::
         <option value="3">3</option>
     </select>
 
-If second argument is hash it creates options with the value equal hash key and text equal hash value::
+If second argument is hash it creates options with the value equal hash
+key and text equal hash value::
 
     var opts = {1: 'one', 2: 'two', 3: 'three'};
 
@@ -91,7 +93,8 @@ Result::
         <option value="3">three</option>
     </select>
 
-If first element is False it returns option objects array instead of appending.
+If first element is False it returns option objects array instead of
+appending.
 
 element.getSelected
 ----------------------------
@@ -151,14 +154,30 @@ Result::
         <span class="spanclass">1</span>
     </div>
 
+
+element.appendChildNoCopy
+----------------------------
+Similar to `appendChild` but don't saves input structure and transforms
+it to to tree of nodes. This function can be used for obtaining variable
+with the created tree::
+
+    var s = [{'p': {innerText: 'New text.'}},
+            {'span': {className: 'spanclass', innerText: 'idx'}}];
+    element.appendChildNoCopy(document.body, s);
+
+s now is array with two nodes::
+    <p>New text.</p>
+    <span class="spanclass">text</span>
+
+
 element.insert
 ----------------------------
 
 Insert element before/after element.
 
-Takes three arguments: base dom element, dom element which must be inserted
-before/afer base element and optional boolean parameter which indicates that
-element must be inserted after base element.
+Takes three arguments: base dom element, dom element which must be
+inserted before/afer base element and optional boolean parameter which
+indicates that element must be inserted after base element.
 
 Second element can be hash which works like in appendChild::
 
@@ -251,13 +270,16 @@ Result::
 element.downTree
 ----------------------------
 
-Bypasses child nodes and calls argument function with the node as the first argument.
+Bypasses child nodes and calls argument function with the node as the
+first argument.
 
-Takes three arguments: function to call, dom element which nodes will be used
-and optional boolean parameter which indicates that function must return some value.
+Takes three arguments: function to call, dom element which nodes will be
+used and optional boolean parameter which indicates that function must
+return some value.
 
-Returns first returned value if third parameter passed. If called function not returns
-anything returns true after all elements will be processed::
+Returns first returned value if third parameter passed. If called
+function not returns anything returns true after all elements will be
+processed::
 
     //Function that return hash with form data.
     function getFormData(form){
@@ -285,9 +307,14 @@ anything returns true after all elements will be processed::
 element.getOffset
 ----------------------------
 
-Takes two arguments: dom element and element on which is calculated offset.
-Returns: object with two parameters: top and left which are element offset.
-If second parameter not passed offset is calculated relative to body element.
+Takes two arguments: dom element and element on which is calculated
+offset.
+
+Returns: object with two parameters: top and left which are element
+offset.
+
+If second parameter not passed offset is calculated relative to body
+element.
 
 
 Additions
@@ -297,4 +324,5 @@ Along with the class comes additional functions:
 
 isElement, isArray, isHash, isFunction, isString, isNumber, isError, isUndef
 
-This functions takes one argument and returns true if this variable has a specific type.
+This functions takes one argument and returns true if this variable has
+a specific type.

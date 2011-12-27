@@ -1,5 +1,5 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.0.5
+// v. 1.0.6
 // (c) 2011 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
 
@@ -99,7 +99,27 @@ var element = new ( function(){
         }
     }
 
-    this.appendChild = function(obj, arr){
+    this.appendChild = function(o, arr){
+        function deepCopy(obj){
+            if(isArray(obj)){
+                var out = [];
+                var len = obj.length;
+                for(var i = 0 ; i < len; i++)
+                    out[i] = arguments.callee(obj[i]);
+                return out;
+            }
+            if(isHash(obj)){
+                var out = {};
+                for(var i in obj)
+                    out[i] = arguments.callee(obj[i]);
+                return out;
+            }
+            return obj;
+        }
+        this.appendChildNoCopy(o, deepCopy(arr));
+    }
+
+    this.appendChildNoCopy = function(obj, arr){
         var ar = new Array();
         if(isArray(arr)){
             ar = arr;
