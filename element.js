@@ -147,7 +147,7 @@ var element = new ( function(){
                 ar[i] = this.create(ar[i]);
             }
             if(isArray(ar[i])){
-                this.appendChild(ar[i-1], ar[i]);
+                this.appendChildNoCopy(ar[i-1], ar[i]);
             }else{
                 obj.appendChild(ar[i]);
             }
