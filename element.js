@@ -1,5 +1,5 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.0.6
+// v. 1.0.7
 // (c) 2011 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
 
@@ -77,10 +77,14 @@ var element = new ( function(){
         if(!elem || elem == '') elem = 'text';
         var elm = document.createElement(elem);
         for(var i in params){
-            if(i == 'choices')
+            if(i == 'choices'){
                 this.addOption(elm, params[i], params['value']);
-            else
+            }else if(i == 'style' && isHash(params[i])){
+                for(var j in params[i])
+                    elm.style[j] = params[i][j];
+            }else{
                 elm[i] = params[i];
+            }
         }
         if(childs)
             this.appendChild(elm, childs);

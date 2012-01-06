@@ -48,6 +48,8 @@ Result::
         </p>
     </div>
 
+If you want to change default css styles, you need to pass it in second
+parameter as hash `style`.
 If second parameter have `choices` key, it will be processed as list of
 options, i.e. its contents will be passed to element.addOption function
 as crerated element as first parameter, content of `choices` as second
