@@ -30,19 +30,21 @@ var element = new ( function(){
         var selected = null;
         if(isArray(sel))
             selected = sel;
-        else if(isString(sel))
-            selected = new Array(sel);
+        else if(isString(sel) || isNumber(sel)){
+            selected = new Array();
+            selected.push(sel);
+        }
 
         if(isArray(arr)){ //isArray?
             for(var i=0; i < arr.length; i++){
                 if(isArray(arr[i]) && arr[i].length == 2)
-                    opts.push(this.create('option', {value: arr[i][0], text: arr[i][1]}));
+                    opts.push(this.create('option', {value: arr[i][0], innerText: arr[i][1]}));
                 else
-                    opts.push(this.create('option', {value: arr[i], text: arr[i]}));
+                    opts.push(this.create('option', {value: arr[i], innerText: arr[i]}));
             }
         }else{//isHash?
             for(var i in arr)
-                opts.push(this.create('option', {value: i, text: arr[i]}));
+                opts.push(this.create('option', {value: i, innerText: arr[i]}));
         }
         if(selected){
             for(var i=0; i < opts.length; i++){
@@ -94,7 +96,7 @@ var element = new ( function(){
     this.remove = function(elem){
         if(!elem) return;
         if(isArray(elem)){
-            for(var el in elem)
+            for(var el=0; el<elem.length; el++)
                 this.remove(elem[el]);
         }else{
             this.removeAllChilds(elem);
