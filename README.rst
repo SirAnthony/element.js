@@ -286,24 +286,22 @@ processed::
     //Function that return hash with form data.
     function getFormData(form){
         var formData = {};
-        var f = function(elm){
-        if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-            if(elm.type == "checkbox"){
-                formData[elm.name] = elm.checked;
-            }else if(elm.type == "select-multiple"){
-                var values = new Array();
-                element.downTree(function(opt){
-                    if(opt.selected) values.push(opt.value);}, elm);
-                        formData[elm.name] = values;
-                    }else if(elm.type != "button"){
-                        formData[elm.name] = elm.value;
-                    }
+        element.downTree(function _f(elm){
+            if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
+                if(elm.type == "checkbox"){
+                    formData[elm.name] = elm.checked;
+                }else if(elm.type == "select-multiple"){
+                    var values = new Array();
+                    element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
+                    formData[elm.name] = values;
+                }else if(elm.type != "button"){
+                    formData[elm.name] = elm.value;
+                }
             }else{
-                element.downTree(f, elm);
+                element.downTree(_f, elm);
             }
-        }
-       element.downTree(f, form);
-       return formData;
+        }, form);
+        return formData;
     }
 
 element.getOffset
