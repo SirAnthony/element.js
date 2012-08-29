@@ -96,7 +96,7 @@ var element = new ( function(){
     this.remove = function(elem){
         if(!elem) return;
         if(isArray(elem)){
-            for(var el=0; el<elem.length; el++)
+            for(var el=0; el < elem.length; el++)
                 this.remove(elem[el]);
         }else{
             this.removeAllChilds(elem);
@@ -110,14 +110,14 @@ var element = new ( function(){
             if(isArray(obj)){
                 var out = [];
                 var len = obj.length;
-                for(var i = 0 ; i < len; i++)
-                    out[i] = arguments.callee(obj[i]);
+                for(var i = 0; i < len; i++)
+                    out[i] = deepCopy(obj[i]);
                 return out;
             }
             if(isHash(obj)){
                 var out = {};
                 for(var i in obj)
-                    out[i] = arguments.callee(obj[i]);
+                    out[i] = deepCopy(obj[i]);
                 return out;
             }
             return obj;
@@ -153,7 +153,12 @@ var element = new ( function(){
                 ar[i] = this.create(ar[i]);
             }
             if(isArray(ar[i])){
-                this.appendChildNoCopy(ar[i-1], ar[i]);
+                var elm = i - 1;
+                while(!isElement(ar[elm])){
+                    if(--elm < 0)
+                        throw Error("No element to append");
+                }
+                this.appendChildNoCopy(ar[elm], ar[i]);
             }else{
                 obj.appendChild(ar[i]);
             }
@@ -173,7 +178,7 @@ var element = new ( function(){
             var el = elem.shift();
             elem = elem.shift();
             if(isElement(el)){
-                element.appendChild(el, elem);
+                this.appendChild(el, elem);
                 elem = el;
             }else if(isHash(el)){
                 for(var i in el)
@@ -217,11 +222,20 @@ function isHash(object) {
         !object.nodeName &&
         !isArray(object);
 }
+function isNodeList(object){
+    return object && typeof object === 'object' &&
+        /^\[object (HTMLCollection|NodeList|Object)\]$/.test(
+            Object.prototype.toString.call(object)) &&
+        typeof object.length == 'number' &&
+        typeof object.item == 'function' &&
+        (object.length == 0 || (typeof object[0] === "object" && object[0].nodeType > 0))
+    return true;
+}
 function isFunction(object){return typeof object == "function";}
 function isString(object){return typeof object == "string";}
 function isNumber(object){return typeof object == "number";}
 function isError(object){return object instanceof Error ||
-    (typeof e === 'object' && objectToString(e) === '[object Error]');}
+    (typeof e === 'object' && Object.prototype.toString.call(e) === '[object Error]');}
 function isUndef(object){return typeof object == "undefined";}
 
 element.init();

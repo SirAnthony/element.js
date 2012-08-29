@@ -322,7 +322,8 @@ Additions
 
 Along with the class comes additional functions:
 
-isElement, isArray, isHash, isFunction, isString, isNumber, isError, isUndef
+isElement, isArray, isHash, isNodeList, isFunction, isString, isNumber, 
+isError, isUndef
 
 This functions takes one argument and returns true if this variable has
 a specific type.
