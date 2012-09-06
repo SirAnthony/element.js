@@ -237,6 +237,7 @@ element.removeAllChilds
 
 Removes all child nodes of element.
 
+Takes two arguments: dom element to remove, and dom element which must be
 Takes one argument: dom element::
 
     element.removeAllChilds(select);
@@ -249,9 +250,8 @@ Result::
 element.remove
 ----------------------------
 
-Removes dom element and all its child nodes.
-
-Takes one argument: dom element::
+Removes dom element and and optional boolean, which indicates do
+childnodes must be saved in deattaced element or not::
 
     element.remove(select2);
 
@@ -322,7 +322,7 @@ Additions
 
 Along with the class comes additional functions:
 
-isElement, isArray, isHash, isNodeList, isFunction, isString, isNumber, 
+isElement, isArray, isHash, isNodeList, isFunction, isString, isNumber,
 isError, isUndef
 
 This functions takes one argument and returns true if this variable has

@@ -93,13 +93,13 @@ var element = new ( function(){
         return elm;
     }
 
-    this.remove = function(elem){
+    this.remove = function(elem, top){
         if(!elem) return;
         if(isArray(elem)){
             for(var el=0; el < elem.length; el++)
-                this.remove(elem[el]);
+                this.remove(elem[el], top);
         }else{
-            this.removeAllChilds(elem);
+            if(!top) this.removeAllChilds(elem);
             if(elem.parentNode)
                 elem.parentNode.removeChild(elem);
         }
