@@ -1,0 +1,25 @@
+{
+  "name": "element",
+  "main": "element.js",
+  "version": "1.0.7",
+  "homepage": "https://github.com/SirAnthony/element.js",
+  "authors": [
+    "Sir Anthony <anthony@adsorbtion.org>"
+  ],
+  "description": "Javascript class which facilitates work with the DOM",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "dom",
+    "element"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
