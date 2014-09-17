@@ -7,7 +7,8 @@ element.js - Javascript class which facilitates work with the DOM
 Basic usage
 ============================
 
-.. _create: element.create
+.. _create:
+element.create
 ----------------------------
 
 Creates new dom element and returns it.
@@ -46,7 +47,8 @@ Special parameters of second argument:
              passed to appendChild_ function.
 
 
-.. _createMany: element.createMany
+.. _createMany:
+element.createMany
 ----------------------------
 
 Creates array of elements.
@@ -63,7 +65,8 @@ Result::
 `_order` object parameter can be passed to specify order of elements creation.
 
 
-.. _createCount: element.createCount
+.. _createCount:
+element.createCount
 ----------------------------
 
 Like create_, but creates array of similar elements. Takes four arguments.
@@ -79,7 +82,8 @@ Result::
      <option className="opt">Hello World</option>]
 
 
-.. _appendChild: element.appendChild
+.. _appendChild:
+element.appendChild
 ----------------------------
 
 Append nodes to element.
@@ -126,7 +130,8 @@ Result::
     </div>
 
 
-.. _appendChildCopy: element.appendChildCopy
+.. _appendChildCopy:
+element.appendChildCopy
 ----------------------------
 
 Similar to appendChild_ but do deep copy of input structure before
@@ -134,7 +139,8 @@ passing it to appendChild. Returns new structure with DOM Nodes,
 structure passed as second argument will not be changed.
 
 
-.. _addOption: element.addOption
+.. _addOption:
+element.addOption
 ----------------------------
 
 Add options to the select element.
@@ -166,7 +172,8 @@ Result::
     </select>
 
 
-.. _getSelected: element.getSelected
+.. _getSelected:
+element.getSelected
 ----------------------------
 
 Returns index of selected option or -1 if none.
@@ -179,14 +186,16 @@ Takes one argument - select element::
     element.getSelected(select2) == 1;
 
 
-.. _getSelectedValues: element.getSelectedValues
+.. _getSelectedValues:
+element.getSelectedValues
 ----------------------------
 
 Returns value of selected option.
 If Node is select-multiple tag, then array of values will be returned.
 
 
-.. _insert: element.insert
+.. _insert:
+element.insert
 ----------------------------
 
 Insert element before/after DOM Node.
@@ -241,7 +250,8 @@ Result::
     </div>
 
 
-.. _removeChildren: element.removeChildren
+.. _removeChildren:
+element.removeChildren
 ----------------------------
 
 Removes all child nodes of element.
@@ -254,7 +264,8 @@ Result::
     <select id="show"></select>
 
 
-.. _remove: element.remove
+.. _remove:
+element.remove
 ----------------------------
 
 Removes DOM Node and its children from parent.
@@ -282,7 +293,8 @@ Result::
     </div>
 
 
-.. _mapTree: element.mapTree
+.. _mapTree:
+element.mapTree
 ----------------------------
 
 Bypass child nodes and calling argument function with the Node as the
@@ -312,7 +324,8 @@ Returns array with result of function call::
     }
 
 
-.. _getOffset: element.getOffset
+.. _getOffset:
+element.getOffset
 ----------------------------
 
 Get offset between two DOM Nodes
