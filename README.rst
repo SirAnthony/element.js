@@ -7,135 +7,112 @@ element.js - Javascript class which facilitates work with the DOM
 Basic usage
 ============================
 
+.. _create:
+
 element.create
 ----------------------------
 
 Creates new dom element and returns it.
 
-Takes three arguments.
-First two required arguments: tag name and element parameters as hash::
+Takes three arguments. 
+First two arguments are required: tag name and element parameters as object::
+If tag name is not string or empty it will created as text node::
+Last argument, if given, will be passed to element.appendChild as second parameter
+with created element as first parameter::
 
     var select = element.create('select', {id: 'show', onchange: function(){alert();}});
+    var select2 = element.create('select', {id: 'show2'});
+    var text = element.create(null, {textContent: 'Hello world!'});
+    var temp = element.create('div', {className: 'example'}, ['p', [{'span': {className: 'span'}}, text]])
 
 Result::
 
     <select id="show"></select>
-
-Second::
-
-    var select2 = element.create('select', {id: 'show2'});
-
-Result::
-
     <select id="show2"></select>
-
-innerText property can be used as element text.
-If tag name is empty string it will creates text node::
-
-    var text = element.create('', {innerText: 'Hello world!'});
-
-Last argument if given passed to element.appendChild as second parameter
-with created element as first parameter::
-
-    var temp = element.create('div', {className: 'example'}, ['p', [{'span': {className: 'span'}}, 'span']])
-
-Result::
-
+    Hello World!
     <div class="example">
         <p>
             <span class="span"></span>
-            <span></span>
+            Hello World!
         </p>
     </div>
 
-If you want to change default css styles, you need to pass it in second
-parameter as hash `style`.
-If second parameter have `choices` key, it will be processed as list of
-options, i.e. its contents will be passed to element.addOption function
-as crerated element as first parameter, content of `choices` as second
-parameter and content of `value` as third parameter.
+Special parameters of second argument:
+
+:style      Object that will be passed to Node style property.
+:choices    List that will be processed as list of options, and passed to
+            options, i.e. its contents will be passed to addOption_
+            function with created Node as first, content of `choises` as
+            second and content of `value` as third parameter.
+:childNodes Array or Object with child nodes of current element, will be
+            passed to appendChild_ function.
 
 
-element.addOption
+.. _createMany:
+
+element.createMany
 ----------------------------
 
-Adds options to the select element.
+Creates array of elements.
+Takes one argument - object where keys - created Node tags and values is Node
+parameters::
 
-Takes three arguments: dom element, array/hash of options and optional
-array of selected options keys, which marks coincident options as
-`selected`.
-
-If second argument is array it creates options with the same value and
-text::
-
-    var opts = new Array(1,2,3);
-
-    element.addOption(select, opts);
+    var elements = element.createMany({'p': {name: 'p'}, 'span': {name: 'span'}});
 
 Result::
 
-    <select id="show">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-    </select>
+    [<p name="p"></p>, <span name="span"></span>]
 
-If second argument is hash it creates options with the value equal hash
-key and text equal hash value::
 
-    var opts = {1: 'one', 2: 'two', 3: 'three'};
+`_order` object parameter can be passed to specify order of elements creation.
 
-    element.addOption(select2, opts);
+
+.. _createCount:
+
+element.createCount
+----------------------------
+
+Like create_, but creates array of similar elements. Takes four arguments.
+First three arguments passed to create_ function, last argument is count
+of new elements must be created::
+
+    var options = element.createMany('option', {className: 'opt'}, [{'', textContent: 'Hello World'}], 3);
 
 Result::
 
-    <select id="show2">
-        <option value="1">one</option>
-        <option value="2">two</option>
-        <option value="3">three</option>
-    </select>
+    [<option className="opt">Hello World</option>,
+     <option className="opt">Hello World</option>,
+     <option className="opt">Hello World</option>]
 
-If first element is False it returns option objects array instead of
-appending.
 
-element.getSelected
-----------------------------
-
-Returns index of selected option.
-
-Takes one argument: select element::
-
-    select2.childNodes[1].selected = true;
-
-    var idx = element.getSelected(select2);
-
-idx is 1 now
+.. _appendChild:
 
 element.appendChild
 ----------------------------
 
-Appends nodes to element.
+Append nodes to element.
 
-Takes two arguments: dom element and element or elements array. You can
-pass element node name as second argument if you want create element
-without parameters. Also you can pass hash to create element with
-parametes. If array is passed, it will be processed as siblings. If
-array contains another element arrays function will be recursively
-called with this arrays as second parameters and previous element as
-first parameter. Hash with tag name as key and parameters hash as value
-can be used for dynamic element creation::
+Takes two arguments: DOM Node as first and interpretable structure as
+second. Returns inserted structure converted to DOM Nodes.
+If second argument is function it will be evaluated and result
+will be treated as children elements (based on returned content). If
+second argument is string it will be parsed as JSON.
+Object as second argument (or as result of pervious two evaluations)
+will be passed to createMany_.
+Array will be processed as sibling Nodes. Function will be recursivelly
+called for each array element with this element as second argument and
+pervious element as first argument. Complex structures can be used in
+dynamic tree generation::
 
     var div = element.create('div');
     element.appendChild(div, [
-        {'p': {innerText: 'New text.'}},
+        {'p': {textContent: 'New text.'}},
         'ul', [
-            {'li': {innerText: 'First list element.'}},
-            'li', [
-                text
-            ]
+            {'li': {textContent: 'First list element.'}},
+            'li', [text],
         ],
         select2,
-        {'span': {className: 'spanclass', innerText: idx}}
+        {'span': {className: 'spanclass', textContent: idx}}
     ]);
 
 Result::
@@ -157,33 +134,94 @@ Result::
     </div>
 
 
-element.appendChildNoCopy
+.. _appendChildCopy:
+
+element.appendChildCopy
 ----------------------------
-Similar to `appendChild` but don't saves input structure and transforms
-it to to tree of nodes. This function can be used for obtaining variable
-with the created tree::
 
-    var s = [{'p': {innerText: 'New text.'}},
-            {'span': {className: 'spanclass', innerText: 'idx'}}];
-    element.appendChildNoCopy(document.body, s);
+Similar to appendChild_ but do deep copy of input structure before
+passing it to appendChild. Returns new structure with DOM Nodes,
+structure passed as second argument will not be changed.
 
-s now is array with two nodes::
-    <p>New text.</p>
-    <span class="spanclass">text</span>
 
+.. _addOption:
+
+element.addOption
+----------------------------
+
+Add options to the select element.
+
+Takes three arguments: dom element, array/object with options and
+optional array of selected options keys, which marks coincident
+options as `selected`.
+
+If second argument is array it will create options with the same
+value and text. If second argument is object, it will create options
+with the value equal object keys and text equal object values::
+
+    var array_opts = [1,2,3];
+    var obj_opts = {1: 'one', 2: 'two', 3: 'three'};
+    element.addOption(select, opts, [2]);
+    element.addOption(select2, opts);
+
+Result::
+
+    <select id="show">
+        <option value="1">1</option>
+        <option value="2" selected="selected">2</option>
+        <option value="3">3</option>
+    </select>
+    <select id="show2">
+        <option value="1">one</option>
+        <option value="2">two</option>
+        <option value="3">three</option>
+    </select>
+
+
+.. _getSelected:
+
+element.getSelected
+----------------------------
+
+Returns index of selected option or -1 if none.
+If Node is select-multiple tag, then array with selected values
+will be returned instead of index.
+
+Takes one argument - select element::
+
+    select2.childNodes[1].selected = true;
+    element.getSelected(select2) == 1;
+
+
+.. _getSelectedValues:
+
+element.getSelectedValues
+----------------------------
+
+Returns value of selected option.
+If Node is select-multiple tag, then array of values will be returned.
+
+
+.. _insert:
 
 element.insert
 ----------------------------
 
-Insert element before/after element.
+Insert element before/after DOM Node.
 
-Takes three arguments: base dom element, dom element which must be
+Takes three arguments: base DOM Node, structure which must be
 inserted before/afer base element and optional boolean parameter which
 indicates that element must be inserted after base element.
+Returns inserted elements structure.
+If second argument is string it will be treated as Node tag.
+If second argument is object it will be passed to createMany_ before
+inserting.
+If second argument is array it will be recursivelly converted to DOM
+Nodes tree and top nodes will be inserted in order.::
 
-Second element can be hash which works like in appendChild::
 
-    element.insert(select2, {'p': {innerText: 'New text before select.'}});
+    element.insert(select2, {'p': {textContent: 'New text before select.'}});
+    element.insert(select2, text, true); // Move text node from li to div
 
 Result::
 
@@ -204,17 +242,6 @@ Result::
         <span class="spanclass"></span>
     </div>
 
-Also second element can be an array for tree creation. In this case its
-first element will be processed as inserted element and second element
-will be appended to it. All next array elements will be discarded, many
-first-level elements insert not supported yet.
-
-Now insert after::
-
-    element.insert(select2, text, true); // Move text node from li to div
-
-Result::
-
     <div>
         <p>New text.</p>
         <ul>
@@ -232,26 +259,34 @@ Result::
     </div>
 
 
-element.removeAllChilds
+.. _removeChildren:
+
+element.removeChildren
 ----------------------------
 
 Removes all child nodes of element.
+Takes one argument: DOM Node. Returns array of children removed::
 
-Takes two arguments: dom element to remove, and dom element which must be
-Takes one argument: dom element::
-
-    element.removeAllChilds(select);
+    element.removeChildren(select);
 
 Result::
 
     <select id="show"></select>
 
 
+.. _remove:
+
 element.remove
 ----------------------------
 
-Removes dom element and and optional boolean, which indicates do
-childnodes must be saved in deattaced element or not::
+Removes DOM Node and its children from parent.
+Takes two arguments: first required argument is DOM Node to remove,
+second optional argument specify if children must be removed from
+Node, or left there.
+If array is passed as first argument remove operation will be done
+for each element.
+Returns array with removed elements and children (if third argument
+passed)::
 
     element.remove(select2);
 
@@ -269,61 +304,61 @@ Result::
     </div>
 
 
-element.downTree
+.. _mapTree:
+
+element.mapTree
 ----------------------------
 
-Bypasses child nodes and calls argument function with the node as the
+Bypass child nodes and calling argument function with the Node as the
 first argument.
 
-Takes three arguments: function to call, dom element which nodes will be
-used and optional boolean parameter which indicates that function must
-return some value.
+Takes two arguments: function to call and DOM Node which nodes will
+be mapped.
 
-Returns first returned value if third parameter passed. If called
-function not returns anything returns true after all elements will be
-processed::
+Returns array with result of function call::
 
-    //Function that return hash with form data.
+    //Function that return object with form data.
     function getFormData(form){
         var formData = {};
-        element.downTree(function _f(elm){
-            if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-                if(elm.type == "checkbox"){
+        var tags = ['INPUT', 'TEXTAREA', 'SELECT'];
+        element.mapTree(function _f(elm){
+            if (tags.indexOf(elm.tagName)>=0){
+                if (elm.type == "checkbox")
                     formData[elm.name] = elm.checked;
-                }else if(elm.type == "select-multiple"){
-                    var values = new Array();
-                    element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
-                    formData[elm.name] = values;
-                }else if(elm.type != "button"){
+                else if (elm.type == "select-multiple")
+                    formData[elm.name] = element.getSelectedValues(elm);
+                else if (elm.type != "button")
                     formData[elm.name] = elm.value;
-                }
-            }else{
-                element.downTree(_f, elm);
-            }
+            } else
+                element.mapTree(_f, elm);
         }, form);
         return formData;
     }
 
+
+.. _getOffset:
+
 element.getOffset
 ----------------------------
 
-Takes two arguments: dom element and element on which is calculated
+Get offset between two DOM Nodes
+
+Takes two arguments: both DOM Nodes between which offset is calculated.
+Returns: object with two parameters: top and left which are first Node
 offset.
+In case second parameter is not passed, offset is calculated relative
+to body element.
 
-Returns: object with two parameters: top and left which are element
-offset.
 
-If second parameter not passed offset is calculated relative to body
-element.
-
+.. _addition:
 
 Additions
 ----------------------------
 
-Along with the class comes additional functions:
+Additional utility functions is available:
 
-isElement, isArray, isHash, isNodeList, isFunction, isString, isNumber,
-isError, isUndef
+isElement, isArray, isObject, isHash, isNodeList, isFunction, isString,
+isNumber, isError, isUndef
 
 This functions takes one argument and returns true if this variable has
 a specific type.

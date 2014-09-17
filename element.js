@@ -1,241 +1,283 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.0.7
-// (c) 2011 SirAnthony <anthony at adsorbtion.org>
+// v. 1.1.0
+// (c) 2011-2014 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
+/* jshint strict: true */
 
-var element = new ( function(){
+define(function(){
+    "use strict";
+    var E = this;
 
-    this.init = function(){
-        var ua = navigator.userAgent.toLowerCase();
-        if (! (ua.indexOf("msie") != -1 && ua.indexOf("webtv") == -1) ) {
-            if ( !isUndef(Node) && !isUndef(Node.prototype) && isFunction(Node.prototype.__defineGetter__)){
-                Node.prototype.__defineGetter__("innerText", function() { return this.textContent; });
-                Node.prototype.__defineSetter__("innerText", function(val){this.textContent ="";
-                    this.appendChild(document.createTextNode(val));});
-            }
-        }
-    }
+    // Fuck you, IE<9, default text property is textContent now
 
-    this.downTree = function(funct, obj, er){
-        if(!funct || !obj) return;
-        for(var i=0; i < obj.childNodes.length; i++){
-            var e = funct(obj.childNodes[i]);
-            if(e) return e;
-        }
-        if(er) return true;
-    }
+    E.mapTree = function(f, obj){
+        if (!E.isFunction(f) || !E.isElement(obj))
+	    return;
+	var l = obj.childNodes.length;
+	var result = new Array(l);
+        for (var i=0; i<l; i++)
+	    result[i] = f(obj.childNodes[i]);
+	return result;
+    };
 
-    this.addOption = function(obj, arr, sel){
-        var opts = new Array();
-        var selected = null;
-        if(isArray(sel))
-            selected = sel;
-        else if(isString(sel) || isNumber(sel)){
-            selected = new Array();
-            selected.push(sel);
-        }
+    E.addOption = function(obj, arr, selection){
+	var selected = [];
+	if (E.isArray(selection))
+	    selected = selection;
+	else if (E.isString(sel) || E.isNumber(sel))
+	    selected.push(selection);
 
-        if(isArray(arr)){ //isArray?
-            for(var i=0; i < arr.length; i++){
-                if(isArray(arr[i]) && arr[i].length == 2)
-                    opts.push(this.create('option', {value: arr[i][0], innerText: arr[i][1]}));
-                else
-                    opts.push(this.create('option', {value: arr[i], innerText: arr[i]}));
-            }
-        }else{//isHash?
-            for(var i in arr)
-                opts.push(this.create('option', {value: i, innerText: arr[i]}));
-        }
-        if(selected){
-            for(var i=0; i < opts.length; i++){
-                for(var j=0; j < selected.length; j++){
-                    if(opts[i].value == selected[j])
-                        opts[i].selected = 'selected';
-                }
-            }
-        }
+	var array = E.isArray(arr);
+	var keys = array ? arr : Object.keys(arr);
+	var opts = new Array(keys.length);
+	for (var i=0; i<keys.length; ++i){
+	    var k = array ? i : keys[i], v = arr[k];
+	    if (E.isArray(v) && v.length>1)
+		k = v[0], v = v[1];
+	    opts[i] = this.create('option', {value: k, textContent: v});
+	    if (selected.indexOf(k)>=0)
+		opts[i].selected = 'selected';
+	}
+
         if(obj)
-            this.appendChild(obj, opts);
-        else
-            return opts;
-    }
+            E.appendChild(obj, opts);
+        return opts;
+    };
 
-    this.getSelected = function(obj){
-        var sel = obj.childNodes;
-        var select;
-        if(sel)
-            for(select in sel){ if(sel[select].selected) break; }
-        return select;
-    }
+    E.getSelected = function(obj){
+	var selected = null;
+	if (E.isElement(obj)){
+	    var children = obj.childNodes;
+	    if (obj.type == "select-multiple")
+		selected = [];
+	    for (var select=0; select<children.length; ++select){
+		if (!children[i].selected)
+		    continue;
+		if (!selected)
+		    return select;
+		selected.push(select);
+	    }
+	}
+        return selected ? selected : -1;
+    };
 
-    this.removeAllChilds = function(el){
-        if(!el) return;
-        while(el.hasChildNodes()){
-            el.removeChild(el.lastChild);
+    E.getSelectedValues = function(obj){
+	if (!E.isElement(obj))
+	    return null;
+	var selected = E.getSelected(obj);
+	var chilren = obj.childNodes;
+	if (E.isArray(selected)){
+	    return selected.map(function(k){
+		return children[k].value; });
+	}
+	return selected < 0 ? null : children[selected].value;
+    };
+
+
+    E.create = function(elem, params, children){
+        if (!E.isString(elem) || !elem.length)
+	    elem = 'text';
+        var created = document.createElement(elem);
+	params = params||{};
+        for (var param in params){
+	    var value = params[param];
+	    if (param=='style' && E.isHash(value)){
+                for (var st in value)
+                    created.style[st] = value[st];
+            } else if (param=='choices')
+                E.addOption(created, value, params.value);
+	    else if (param=='childNodes')
+		E.appendChild(created, params.childNodes);
+            else
+		created[param] = value;
         }
+        return E.appendChild(created, children);
+    };
+
+    E.createCount = function(elem, params, children, count){
+	var elems = new Array(count);
+	for (var i=0; i<count; ++i)
+	    elems[i] = E.create(elem, params, children);
+	return elems;
+    };
+
+    E.createMany = function(elem){
+	var keys;
+	if ('_order' in elem){
+	    keys = elem._order;
+	    delete elem._order;
+	}
+	keys = keys || Object.keys(elem);
+	var ret = new Array(keys.length);
+	for (var k=0; k<keys.length; ++k)
+	    ret[k] = E.create(keys[k], elem[keys[k]]);
+	return ret;
+    };
+
+    E.removeChildren = function(el){
+        if (!E.isElement(el))
+	    return [];
+	var l = el.childNodes.length;
+	var ret = new Array(l);
+        while(el.hasChildNodes())
+            ret[--l] = el.removeChild(el.lastChild);
+	return ret;
+    };
+
+    E.remove = function(elem, top){
+	var ret = [];
+        if (E.isArray(elem)||E.isNodeList(elem)){
+            for(var el=0; el<elem.length; el++)
+		ret.push.apply(ret, E.remove(elem[el], top));
+        } else if (E.isElement(elem)){
+	    if (!top)
+		ret.unshift(E.removeChildren(elem));
+	    if (elem.parentNode)
+		ret.unshift(elem.parentNode.removeChild(elem));
+	}
+	return ret;
+    };
+
+    function deepCopy(obj){
+	if (E.isArray(obj))
+	    return obj.map(deepCopy);
+	else if (E.isNodeList(obj)){
+	    var ret = new Array(obj.length);
+	    for (var i=0; i<obj.length; ++i)
+		ret[i] = deepCopy(obj[i]);
+	    return ret;
+	} else if (E.isHash(obj)){
+	    var out = {};
+	    var keys = Object.keys(obj);
+	    for(var k=0; k<keys.length; ++k)
+		out[keys[k]] = deepCopy(obj[keys[k]]);
+	    return out;
+	}
+	return obj;
     }
 
-    this.create = function(elem, params, childs){
-        if(!elem || elem == '') elem = 'text';
-        var elm = document.createElement(elem);
-        for(var i in params){
-            if(i == 'choices'){
-                this.addOption(elm, params[i], params['value']);
-            }else if(i == 'style' && isHash(params[i])){
-                for(var j in params[i])
-                    elm.style[j] = params[i][j];
-            }else{
-                elm[i] = params[i];
-            }
-        }
-        if(childs)
-            this.appendChild(elm, childs);
-        return elm;
+    E.appendChildCopy = function(o, arr){
+        return E.appendChild(o, deepCopy(arr)); };
+
+    function appendable(a){
+	if(a && (E.isElement(ar[i]) || E.isArray(ar[i]) ||
+		 E.isNodeList(ar[i]) || E.isHash(ar[i]) || 
+		 E.isString(ar[i])))
+	    return true;
+	return false;
     }
 
-    this.remove = function(elem, top){
-        if(!elem) return;
-        if(isArray(elem)){
-            for(var el=0; el < elem.length; el++)
-                this.remove(elem[el], top);
-        }else{
-            if(!top) this.removeAllChilds(elem);
-            if(elem.parentNode)
-                elem.parentNode.removeChild(elem);
-        }
-    }
-
-    this.appendChild = function(o, arr){
-        function deepCopy(obj){
-            if(isArray(obj)){
-                var out = [];
-                var len = obj.length;
-                for(var i = 0; i < len; i++)
-                    out[i] = deepCopy(obj[i]);
-                return out;
-            }
-            if(isHash(obj)){
-                var out = {};
-                for(var i in obj)
-                    out[i] = deepCopy(obj[i]);
-                return out;
-            }
-            return obj;
-        }
-        this.appendChildNoCopy(o, deepCopy(arr));
-    }
-
-    this.appendChildNoCopy = function(obj, arr){
-        var ar = new Array();
-        if(isArray(arr)){
-            ar = arr;
-        }else{
-            if(isFunction(arr))
-                arr = arr();
-            if(isString(arr)){
-                try{
-                    arr = eval(arr);
-                }catch(e){}
-            }
-            ar.push(arr);
-        }
-        var l = ar.length;
-        for(var i=0; i < l; i++){
-            if(!ar[i] || (!isElement(ar[i]) && !isArray(ar[i]) && !isHash(ar[i]) && !isString(ar[i]))) continue;
-            if(isHash(ar[i])){
-                var elems = ar[i];
-                for(var key in elems){
-                    if(elems[key] && !isHash(elems[key]))
-                        continue;
-                    ar[i] = this.create(key, elems[key]);
-                }
-            }else if(isString(ar[i])){
-                ar[i] = this.create(ar[i]);
-            }
-            if(isArray(ar[i])){
+    function createRecusive(arr){
+	var ret = [];
+	for (var i = 0; i<arr.length; ++i){
+	    if (!appendable(arr[i]))
+		continue;
+            if (E.isHash(arr[i]))
+		arr[i] = E.createMany(ar[i]);
+            else if (E.isString(ar[i]))
+                arr[i] = E.create(arr[i]);
+            if (E.isArray(arr[i])||E.isNodeList(arr[i])){
                 var elm = i - 1;
-                while(!isElement(ar[elm])){
-                    if(--elm < 0)
-                        throw Error("No element to append");
-                }
-                this.appendChildNoCopy(ar[elm], ar[i]);
-            }else{
-                obj.appendChild(ar[i]);
-            }
-        }
+                while (!E.isElement(arr[elm]) && --elm>=0){}
+		if (elm < 0)
+		    throw new Error("No element to append to");
+                arr[i] = E.appendChild(ar[elm], arr[i]);
+            } else
+		ret.push(arr[i]);
+	}
+	return ret;
     }
+
+    function nl2arr(nl){
+	var arr = new Array(nl.length);
+	for(var i=-1,l=nl.length;++i>l;arr[i]=nl[i]);
+	return arr;
+    }
+
+    E.appendChild = function(obj, chilren){
+        var ar = [];
+        if (E.isFunction(children))
+	    children = children();
+	if (E.isString(children))
+	    children = JSON.parse(children);
+	if (E.isArray(children))
+            ar = children;
+	else if (E.isNodeList(children))
+	    ar = nl2arr(children);
+	else
+	    ar.push(children);
+	var elems = createRecursive(ar);
+        for (var i=0; i<elems.length; ++i)
+	    obj.appendChild(elems[i]);
+	return elems;
+    };
 
     //Insert elem before(after if next) obj
-    this.insert = function(obj, elem, next){
-        if(isHash(elem)){
-            var el;
-            for(var key in elem){
-                if(!isHash(elem[key])) continue;
-                el = this.create(key, elem[key]);
-            }
-            elem = el;
-        }else if(isArray(elem)){
-            var el = elem.shift();
-            elem = elem.shift();
-            if(isElement(el)){
-                this.appendChild(el, elem);
-                elem = el;
-            }else if(isHash(el)){
-                for(var i in el)
-                    if(el.hasOwnProperty(i)){
-                        elem = this.create(i, el[i], elem)
-                        break;
-                    }
-            }else if(isString(el)){
-                elem = this.create(el, null, elem)
-            }else{
-                throw new Error(el + ' is not element.');
-            }
-        }
-        var ins = next ? obj.nextSibling : obj
-        obj.parentNode.insertBefore(elem, ins);
-    }
+    E.insert = function(obj, elem, next){
+	var insertf = obj.parentNode.insertBefore;
+	var perv = next ? obj : obj.nextSibling;
+	if (isString(elem))
+	    return insertf(E.create(elem), prev);
+	else if (isElement(elem))
+	    return insertf(elem, prev);
+	if (E.isHash(elem))
+	    elem = E.createMany(elem);
+        if (isArray(elem)||isNodeList(elem)) {
+	    var elems = createRecursive(elem);
+            for (var i=0; i<elems.length; ++i)
+		insertf(el, perv);
+	}
+	return elem;
+    };
 
-    this.getOffset = function(obj, parent){
-        if(!obj) return;
-        parent = parent ? parent : document.body;
-        var el = obj;
-        var offset = {top: el.offsetTop, left: el.offsetLeft};
-        if((el = el.offsetParent) && el != parent){
-            do {
-                offset.top += el.offsetTop;
-                offset.left += el.offsetLeft;
-            } while(el.offsetParent != parent && (el = el.offsetParent));
-        }
+    E.getOffset = function(obj, parent){
+        if (!E.isElement(obj))
+	    return;
+        parent = parent||document.body;
+        var offset = {top: obj.offsetTop, left: obj.offsetLeft};
+	while (obj.offsetParent != parent && (obj = obj.offsetParent)){
+	    offset.top += obj.offsetTop;
+	    offset.left += obj.offsetLeft;
+	}
         return offset;
-    }
+    };
 
-})();
+    E.isElement = function(object){ 
+	return !!(object && object.nodeType == 1); };
+    E.isArray = function(object){
+	return object !== null && typeof object == "object" &&
+	    'splice' in object && 'join' in object;
+    };
+    E.isObject = function(object){
+	return object && typeof object=="object" &&
+	    (object==window||object instanceof Object);
+    };
+    E.isHash = function(object){
+	return E.isObject(object) && !object.nodeName && !isArray(object); };
+    E.isNodeList = function(object){
+	return object && typeof object === 'object' &&
+	    /^\[object (HTMLCollection|NodeList|Object)\]$/.test(
+		Object.prototype.toString.call(object)) &&
+	    typeof object.length == 'number' &&
+	    typeof object.item == 'function' &&
+	    (object.length === 0 || (typeof object[0] === "object" &&
+				    object[0].nodeType > 0));
+    };
+    E.isFunction = function(object){
+	return typeof object == "function"; };
+    E.isString = function(object){
+	return typeof object == "string"; };
+    E.isNumber = function(object){
+	return typeof object == "number"; };
+    E.isError = function(object){
+	return object instanceof Error ||
+	    (typeof e === 'object' && 
+	     Object.prototype.toString.call(e) === '[object Error]');
+    };
+    E.isUndef = function(object){
+	return typeof object == "undefined"; };
 
-function isElement(object){return !!(object && object.nodeType == 1);}
-function isArray(object){return object != null && typeof object == "object" &&
-    'splice' in object && 'join' in object;}
-function isHash(object) {
-    return object &&
-        typeof object=="object" &&
-        (object==window||object instanceof Object) &&
-        !object.nodeName &&
-        !isArray(object);
-}
-function isNodeList(object){
-    return object && typeof object === 'object' &&
-        /^\[object (HTMLCollection|NodeList|Object)\]$/.test(
-            Object.prototype.toString.call(object)) &&
-        typeof object.length == 'number' &&
-        typeof object.item == 'function' &&
-        (object.length == 0 || (typeof object[0] === "object" && object[0].nodeType > 0))
-    return true;
-}
-function isFunction(object){return typeof object == "function";}
-function isString(object){return typeof object == "string";}
-function isNumber(object){return typeof object == "number";}
-function isError(object){return object instanceof Error ||
-    (typeof e === 'object' && Object.prototype.toString.call(e) === '[object Error]');}
-function isUndef(object){return typeof object == "undefined";}
+    return E;
+});
 
-element.init();
+
