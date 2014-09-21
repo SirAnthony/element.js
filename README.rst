@@ -8,7 +8,6 @@ Basic usage
 ============================
 
 .. _create:
-
 element.create
 ----------------------------
 
@@ -39,17 +38,16 @@ Result::
 
 Special parameters of second argument:
 
-:style      Object that will be passed to Node style property.
-:choices    List that will be processed as list of options, and passed to
-            options, i.e. its contents will be passed to addOption_
-            function with created Node as first, content of `choises` as
-            second and content of `value` as third parameter.
-:childNodes Array or Object with child nodes of current element, will be
-            passed to appendChild_ function.
+:style:      Object that will be passed to Node style property.
+:choices:    List that will be processed as list of options, and passed to
+             options, i.e. its contents will be passed to addOption_
+             function with created Node as first, content of `choises` as
+             second and content of `value` as third parameter.
+:childNodes: Array or Object with child nodes of current element, will be
+             passed to appendChild_ function.
 
 
 .. _createMany:
-
 element.createMany
 ----------------------------
 
@@ -68,7 +66,6 @@ Result::
 
 
 .. _createCount:
-
 element.createCount
 ----------------------------
 
@@ -86,7 +83,6 @@ Result::
 
 
 .. _appendChild:
-
 element.appendChild
 ----------------------------
 
@@ -135,7 +131,6 @@ Result::
 
 
 .. _appendChildCopy:
-
 element.appendChildCopy
 ----------------------------
 
@@ -145,7 +140,6 @@ structure passed as second argument will not be changed.
 
 
 .. _addOption:
-
 element.addOption
 ----------------------------
 
@@ -179,7 +173,6 @@ Result::
 
 
 .. _getSelected:
-
 element.getSelected
 ----------------------------
 
@@ -194,7 +187,6 @@ Takes one argument - select element::
 
 
 .. _getSelectedValues:
-
 element.getSelectedValues
 ----------------------------
 
@@ -203,7 +195,6 @@ If Node is select-multiple tag, then array of values will be returned.
 
 
 .. _insert:
-
 element.insert
 ----------------------------
 
@@ -260,7 +251,6 @@ Result::
 
 
 .. _removeChildren:
-
 element.removeChildren
 ----------------------------
 
@@ -275,7 +265,6 @@ Result::
 
 
 .. _remove:
-
 element.remove
 ----------------------------
 
@@ -305,7 +294,6 @@ Result::
 
 
 .. _mapTree:
-
 element.mapTree
 ----------------------------
 
@@ -337,7 +325,6 @@ Returns array with result of function call::
 
 
 .. _getOffset:
-
 element.getOffset
 ----------------------------
 
@@ -350,9 +337,7 @@ In case second parameter is not passed, offset is calculated relative
 to body element.
 
 
-.. _addition:
-
-Additions
+.. _addition: Additions
 ----------------------------
 
 Additional utility functions is available:
