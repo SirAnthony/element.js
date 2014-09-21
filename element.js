@@ -6,7 +6,7 @@
 
 define(function(){
     "use strict";
-    var E = this;
+    var E = {};
 
     // Fuck you, IE<9, default text property is textContent now
 
@@ -32,8 +32,8 @@ define(function(){
 	var opts = new Array(keys.length);
 	for (var i=0; i<keys.length; ++i){
 	    var k = array ? i : keys[i], v = arr[k];
-	    if (E.isArray(v) && v.length>1)
-		k = v[0], v = v[1];
+	    if (E.isArray(v) && v.length>1) /* jshint -W030 */
+		k = v[0], v = v[1];  /* jshint +W030 */
 	    opts[i] = this.create('option', {value: k, textContent: v});
 	    if (selected.indexOf(k)>=0)
 		opts[i].selected = 'selected';
@@ -91,7 +91,8 @@ define(function(){
             else
 		created[param] = value;
         }
-        return E.appendChild(created, children);
+        E.appendChild(created, children)
+        return created;
     };
 
     E.createCount = function(elem, params, children, count){
@@ -167,7 +168,7 @@ define(function(){
 	return false;
     }
 
-    function createRecusive(arr){
+    function createRecursive(arr){
 	var ret = [];
 	for (var i = 0; i<arr.length; ++i){
 	    if (!appendable(arr[i]))
@@ -194,7 +195,7 @@ define(function(){
 	return arr;
     }
 
-    E.appendChild = function(obj, chilren){
+    E.appendChild = function(obj, children){
         var ar = [];
         if (E.isFunction(children))
 	    children = children();
