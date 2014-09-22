@@ -1,6 +1,6 @@
 {
   "name": "element.js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Javascript class which facilitates work with the DOM",
   "main": "element.js",
   "directories": {
@@ -29,7 +29,5 @@
     "grunt-bower-task": "^0.4.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.6.0",
-    "jsdom": "^1.0.0-pre.6",
-    "mocha": "^1.21.4"
   }
 }

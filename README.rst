@@ -92,7 +92,7 @@ Takes two arguments: DOM Node as first and interpretable structure as
 second. Returns inserted structure converted to DOM Nodes.
 If second argument is function it will be evaluated and result
 will be treated as children elements (based on returned content). If
-second argument is string it will be parsed as JSON.
+second argument is string it will be treated as tag name.
 Object as second argument (or as result of pervious two evaluations)
 will be passed to createMany_.
 Array will be processed as sibling Nodes. Function will be recursivelly
@@ -270,12 +270,12 @@ element.remove
 
 Removes DOM Node and its children from parent.
 Takes two arguments: first required argument is DOM Node to remove,
-second optional argument specify if children must be removed from
-Node, or left there.
+second optional argument specify if tree must be expanded (i.e.
+children must be removed from Node and placed to array next to Node).
 If array is passed as first argument remove operation will be done
 for each element.
-Returns array with removed elements and children (if third argument
-passed)::
+Returns array with removed elements and children (if second argument
+specified)::
 
     element.remove(select2);
 
