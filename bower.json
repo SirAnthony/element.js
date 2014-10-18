@@ -1,14 +1,14 @@
 {
   "name": "element",
-  "main": "element.js",
-  "version": "1.1.1",
+  "main": "package/element.js",
+  "version": "1.1.2",
   "homepage": "https://github.com/SirAnthony/element.js",
   "authors": [
     "Sir Anthony <anthony@adsorbtion.org>"
   ],
   "description": "Javascript class which facilitates work with the DOM",
   "moduleType": [
-    "globals"
+    "amd"
   ],
   "keywords": [
     "dom",
@@ -17,6 +17,9 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "Gruntfile.js",
+    "package.json",
+    "build",
     "node_modules",
     "bower_components",
     "test",

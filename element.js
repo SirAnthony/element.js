@@ -13,12 +13,21 @@ define(function(){
     E.mapTree = function(f, obj){
         if (!E.isFunction(f) || !E.isElement(obj))
             return;
-        var l = obj.childNodes.length;
+        var cld = obj.childNodes;
+        var l = cld.length;
         var result = new Array(l);
-        for (var i=0; i<l; i++)
-            result[i] = f(obj.childNodes[i]);
+        for (var i=0; i<l; i++){
+            if (E.isUndef(result[i] = f(cld[i])))
+                 result[i] = E.mapTree(f, cld[i]);
+        }
         return result;
     };
+
+    function range(l){
+        var arr = new Array(l);
+        for (var i=0; i<l; arr[i] = i++);
+        return arr;
+    }
 
     E.addOption = function(obj, arr, selection){
         var selected = [];
@@ -27,11 +36,12 @@ define(function(){
         else if (E.isString(selection) || E.isNumber(selection))
             selected.push(selection);
 
-        var array = E.isArray(arr);
-        var keys = array ? arr : Object.keys(arr);
+        if (E.isFunction(arr))
+            arr = arr(obj);
+        var keys = E.isArray(arr) ? range(arr.length) : Object.keys(arr);
         var opts = new Array(keys.length);
         for (var i=0; i<keys.length; ++i){
-            var k = array ? i : keys[i], v = arr[k];
+            var k = keys[i], v = arr[k];
             if (E.isArray(v) && v.length>1) /* jshint -W030 */
                 k = v[0], v = v[1];  /* jshint +W030 */
             opts[i] = this.create('option', {value: k, textContent: v});
@@ -51,7 +61,7 @@ define(function(){
             if (obj.type == "select-multiple")
                 selected = [];
             for (var select=0; select<children.length; ++select){
-                if (!children[i].selected)
+                if (!children[select].selected)
                     continue;
                 if (!selected)
                     return select;
@@ -61,14 +71,15 @@ define(function(){
         return selected ? selected : -1;
     };
 
-    E.getSelectedValues = function(obj){
+    E.getSelectedParam = function(obj, param){
         if (!E.isElement(obj))
             return null;
+        param = param||'text';
         var selected = E.getSelected(obj);
-        var chilren = obj.childNodes;
+        var children = obj.childNodes;
         if (E.isArray(selected))
-            return selected.map(function(k){ return children[k].value; });
-        return selected < 0 ? null : children[selected].value;
+            return selected.map(function(k){ return children[k][param]; });
+        return selected < 0 ? null : children[selected][param];
     };
 
     E.create = function(elem, params, children){
@@ -89,7 +100,7 @@ define(function(){
                 created[param] = value;
         }
         if (children)
-            E.appendChild(created, children)
+            E.appendChild(created, children);
         return created;
     };
 
@@ -175,7 +186,7 @@ define(function(){
                 arr[i] = E.createMany(arr[i]);
                 if (arr[i].length==1)
                     arr[i] = arr[i][0];
-            } else if (E.isString(arr[i]))
+            } else if (E.isString(arr[i])||E.isNull(arr[i]))
                 arr[i] = E.create(arr[i]);
             if (E.isArray(arr[i])||E.isNodeList(arr[i])||E.isFunction(arr[i])){
                 if (!ret.length)
@@ -215,18 +226,19 @@ define(function(){
 
     //Insert elem before(after if next) obj
     E.insert = function(obj, elem, next){
-        var insertf = obj.parentNode.insertBefore;
-        var perv = next ? obj : obj.nextSibling;
-        if (isString(elem))
-            return insertf(E.create(elem), prev);
-        else if (isElement(elem))
-            return insertf(elem, prev);
+        var perv = next ? obj.nextSibling : obj;
+        var insertf = function(e, p){
+            return obj.parentNode.insertBefore(e, p); };
+        if (E.isString(elem))
+            return insertf(E.create(elem), perv);
+        else if (E.isElement(elem))
+            return insertf(elem, perv);
         if (E.isHash(elem))
             elem = E.createMany(elem);
-        if (isArray(elem)||isNodeList(elem)) {
-            var elems = createRecursive(elem);
-            for (var i=0; i<elems.length; ++i)
-                insertf(el, perv);
+        if (E.isArray(elem)||E.isNodeList(elem)) {
+            elem = createRecursive(elem);
+            for (var i=0; i<elem.length; ++i)
+                insertf(elem[i], perv);
         }
         return elem;
     };
@@ -276,15 +288,16 @@ define(function(){
         return object instanceof Error || (typeof e === 'object' &&
                 Object.prototype.toString.call(e) === '[object Error]');
     };
-    E.isNull = function(object){ return object === null; }
+    E.isNull = function(object){ return object === null; };
     E.isUndef = function(object){
         return typeof object == "undefined"; };
 
     E.t = {
+        range: range,
         deepCopy: deepCopy,
         appendable: appendable,
         createRecursive: createRecursive,
-    }
+    };
 
     return E;
 });

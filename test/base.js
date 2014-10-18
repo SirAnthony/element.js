@@ -1,8 +1,8 @@
 
-define(['element', 'assert'], function(element){
+define(['element', 'package/element', 'assert'], function(enormal, emin){
 var eq = assert.equal;
 var cneq = function(el, c){ return eq(el.childNodes.length, c); };
-describe('element', function(done){
+function do_test(element, done){
     describe('create', function(){
         it('should create element', function(done){
             var s1 = element.create('select', {id: 'show',
@@ -29,7 +29,7 @@ describe('element', function(done){
 	it('should create children as 3rd parameter', function(){
             var text = element.create(null, {textContent: 'Hello world!'});
             var d1 = element.create('div', {className: 'example'},
-                ['p', [{'span': {className: 'span'}}, text]])
+                ['p', [{'span': {className: 'span'}}, text]]);
             cneq(d1, 1);
             var fc = d1.firstChild;
             eq(fc.tagName, 'P');
@@ -75,12 +75,13 @@ describe('element', function(done){
                 eq(el.className, 'opt');
                 cneq(el, 2);
             });
-        })
+        });
     });
     describe('appendChild', function(){
         it('should append to element', function(){
             var el = element.create('div');
-            assert.throws(function(){ element.appendChild(null, []); });
+            assert.throws(function(){
+                element.appendChild(null, []); });
             element.appendChild(el, ['span', 'span']);
             cneq(el, 2);
         });
@@ -100,7 +101,7 @@ describe('element', function(done){
                     return ['a', [{img: {src: 'url'}}]];
                 },
                 'span',
-            ])
+            ]);
             var html = '<div><input type="text"><label>Input</label></div>'+
                 '<p><a><img src="url"></a></p>'+'<span></span>';
             eq(el.innerHTML, html);
@@ -113,7 +114,7 @@ describe('element', function(done){
             element.appendChildCopy(el, children);
             children.forEach(function(cld){
                 eq(typeof cld, 'string'); });
-        })
+        });
     });
     describe('removeChildren', function(){
         it('should remove all children', function(){
@@ -161,22 +162,167 @@ describe('element', function(done){
             cneq(el, 1);
             eq(el.firstChild.tagName, 'SPAN');
             eq(removed.length, 2);
-        })
+        });
     });
-    describe('insert', function(){});
-    describe('addOption', function(){});
-    describe('getSelected', function(){});
-    describe('getSelectedValues', function(){});
-    describe('mapTree', function(){});
-    describe('getOffset', function(){});
+    describe('insert', function(){
+        it('should insert element', function(){
+            var node = element.create('div', {}, ['span', 'span']);
+            var p = element.create('p');
+            element.insert(node.firstChild, p);
+            eq(node.firstChild, p);
+            element.insert(node.lastChild, node.firstChild, true);
+            eq(node.lastChild, p);
+        });
+        it('should accept data and return element', function(){
+            var node = element.create('div', {}, ['span']);
+            var str = element.insert(node.lastChild, 'p', true);
+            cneq(node, 2);
+            eq(str.tagName, 'P');
+            var many = element.insert(node.lastChild, {
+                span: {textContent: 'span'}}, true);
+            cneq(node, 3);
+            assert(element.isArray(many));
+            eq(many[0].textContent, 'span');
+            var array = element.insert(node.lastChild, [
+                null, 'div', ['p']]); // children +2
+            cneq(node, 5);
+            eq(array[1].tagName, 'DIV');
+            cneq(array[1], 1);
+        });
+    });
+    describe('addOption', function(){
+        it('should add option', function(){
+            var sel = element.create('select');
+            var values = ['a', 'b'];
+            var opts = element.addOption(sel, values);
+            opts.forEach(function(opt, i){
+                eq(sel.childNodes[i], opt);
+                eq(opt.value, i);
+                eq(opt.textContent, values[i]);
+            });
+        });
+        it('should accept arrays & hash', function(){
+            var sels = element.createCount('select', null, null, 2);
+            var vals = [[['a', 'aa'], ['b', 'bb']], {a: 'aa', b: 'bb'}];
+            sels.forEach(function(sel, i){
+                var opts = element.addOption(sel, vals[i]);
+                var result = vals[i];
+                if (!element.isArray(result)){
+                    result = [];
+                    for (var k in vals[i])
+                        result.push([k, vals[i][k]]);
+                }
+                opts.forEach(function(opt, i){
+                    eq(sel.childNodes[i], opt);
+                    eq(opt.value, result[i][0]);
+                    eq(opt.textContent, result[i][1]);
+                });
+            });
+        });
+        it('should select options', function(){
+            var sels = element.createCount('select', null, null, 2);
+            var vals = element.addOption(sels[0], ['a', 'b', 'c'], [1]);
+            eq(vals[0].selected, false);
+            eq(vals[1].selected, true);
+            vals = element.addOption(sels[1], {'a': 'x', 'b': 'y'}, ['b']);
+            eq(vals[0].selected, false);
+            eq(vals[1].selected, true);
+        });
+    });
+    describe('getSelected', function(){
+        it('should return selected indices', function(){
+            var sel = element.create('select');
+            var vals = element.addOption(sel, ['a', 'b', 'c'], [1]);
+            var opt = element.getSelected(sel);
+            eq(typeof opt, 'number');
+            eq(opt, 1);
+        });
+        it('should return multiple', function(){
+            var sel = element.create('select', {multiple: true});
+            var vals = element.addOption(sel, ['a', 'b', 'c'], [1, 2]);
+            var opt = element.getSelected(sel);
+            assert(element.isArray(opt));
+            assert.deepEqual(opt, [1, 2]);
+        });
+    });
+    describe('getSelectedParam', function(){
+        it('should return selected parameters', function(){
+            var sel = element.create('select');
+            var vals = element.addOption(sel, ['a', 'b', 'c'], [1]);
+            var opt = element.getSelectedParam(sel);
+            assert(!element.isArray(opt));
+            eq(opt, 'b');
+        });
+        it('should return multiple', function(){
+            var sel = element.create('select', {multiple: true});
+            var vals = element.addOption(sel, ['a', 'b', 'c'], [1, 2]);
+            var opt = element.getSelectedParam(sel);
+            assert(element.isArray(opt));
+            assert.deepEqual(opt, ['b', 'c']);
+        });
+        it('should return parameters', function(){
+            var sel = element.create('select', {multiple: true});
+            var vals = element.addOption(sel, ['a', 'b', 'c'], [1, 2]);
+            var opt = element.getSelectedParam(sel, 'value');
+            assert(element.isArray(opt));
+            assert.deepEqual(opt, ['1', '2']);
+        });
+    });
+    describe('mapTree', function(){
+        function getFormData(form){
+            var data = {};
+            var tags = ['INPUT', 'TEXTAREA', 'SELECT'];
+            element.mapTree(function(elm){
+                if (tags.indexOf(elm.tagName)<0)
+                    return;
+                if (elm.type == "checkbox")
+                    data[elm.name] = elm.checked;
+                else if (elm.type == "select-multiple")
+                    data[elm.name] = element.getSelectedValues(elm);
+                else if (elm.type != "button")
+                    data[elm.name] = elm.value;
+                return true;
+            }, form);
+            return data;
+        }
+        it('should execute example', function(){
+            var form = element.create('form', {}, [
+                {input: {name: 'a', value: 'b'}},
+                {span: {name: 'span', value: 'do not touch'}}, 'div', [
+                    {input: {type: 'checkbox', name: 'c', checked: true}},
+                    {textarea: {name: 'text', value: 'long text'}}]]);
+            var data = getFormData(form);
+            assert.deepEqual(data, {a: 'b', c: true, text: 'long text'});
+        });
+    });
+    describe('getOffset', function(){
+        it('should calculate offset', function(){
+            var el = element.create('div', {style: {
+                marginTop: '10px', paddingLeft: '20px'}}, [{span: {
+                    textContent: 'test span'}}]);
+            element.insert(document.body.firstChild, el);
+            assert.deepEqual(element.getOffset(el.firstChild,
+                document.body), {top: 10, left: 20});
+            element.remove(el);
+        });
+    });
     describe('internal', function(){
+        it('range', function(){
+            var a = element.t.range(5);
+            for (var i=0; i<5; ++i)
+                eq(a[i], i);
+        });
         it('deepCopy', function(){
             var data = {x: [1, 2, '3', [3, 2, {3: 'd'}]]};
             var copy = element.t.deepCopy(data);
             assert.notEqual(data, copy);
             assert.deepEqual(data, copy);
         });
-        describe('createRecursive', function(){});
+        it('createRecursive', function(){
+            // TODO: need more tests
+            assert.throws(function(){
+                element.t.createRecursive([[]]); });
+        });
         it('appendable', function(){
             var app = element.t.appendable;
             var elems = [document.createElement('span'), function(){},
@@ -187,5 +333,7 @@ describe('element', function(done){
             assert(!app());
         });
     });
-});
+}
+describe('element', do_test.bind(null, enormal));
+describe('element.min', do_test.bind(null, emin));
 });

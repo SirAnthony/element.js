@@ -186,11 +186,13 @@ Takes one argument - select element::
     element.getSelected(select2) == 1;
 
 
-.. _getSelectedValues:
-element.getSelectedValues
+.. _getSelectedParam:
+element.getSelectedParam
 ----------------------------
 
-Returns value of selected option.
+Returns parameter value of selected option.
+Takes two arguments - SELECT node and optional parameter name.
+If parameter name not specified, text content will be returned.
 If Node is select-multiple tag, then array of values will be returned.
 
 
@@ -303,24 +305,27 @@ first argument.
 Takes two arguments: function to call and DOM Node which nodes will
 be mapped.
 
-Returns array with result of function call::
+Returns array with result of function call.
+If function applied to element returns nothing, then child nodes
+of this element will be mapped also and result of this map
+will be returned::
 
     //Function that return object with form data.
     function getFormData(form){
-        var formData = {};
+        var data = {};
         var tags = ['INPUT', 'TEXTAREA', 'SELECT'];
-        element.mapTree(function _f(elm){
-            if (tags.indexOf(elm.tagName)>=0){
-                if (elm.type == "checkbox")
-                    formData[elm.name] = elm.checked;
-                else if (elm.type == "select-multiple")
-                    formData[elm.name] = element.getSelectedValues(elm);
-                else if (elm.type != "button")
-                    formData[elm.name] = elm.value;
-            } else
-                element.mapTree(_f, elm);
+        element.mapTree(function(elm){
+            if (tags.indexOf(elm.tagName)<0)
+                return;
+            if (elm.type == "checkbox")
+                data[elm.name] = elm.checked;
+            else if (elm.type == "select-multiple")
+                data[elm.name] = element.getSelectedValues(elm);
+            else if (elm.type != "button")
+                data[elm.name] = elm.value;
+            return true;
         }, form);
-        return formData;
+        return data;
     }
 
 
