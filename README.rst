@@ -14,8 +14,8 @@ element.create
 Creates new dom element and returns it.
 
 Takes three arguments. 
-First two arguments are required: tag name and element parameters as object::
-If tag name is not string or empty it will created as text node::
+First two arguments are required: tag name and element parameters as object.
+If tag name is not string or empty it will created as text node.
 Last argument, if given, will be passed to element.appendChild as second parameter
 with created element as first parameter::
 
