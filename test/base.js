@@ -12,7 +12,7 @@ function do_test(element, done){
             // Must end test
             s1.click();
 	});
-	it('shold create text', function(){
+	it('should create text', function(){
             var text = element.create(null, {textContent: 'Hello world!'});
             eq(text.tagName, 'TEXT');
             eq(text.textContent, 'Hello world!');
