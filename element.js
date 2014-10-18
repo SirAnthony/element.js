@@ -1,5 +1,5 @@
 // element.js - Javascript class which facilitates work with the DOM
-// v. 1.1.1
+// v. 1.2.0
 // (c) 2011-2014 SirAnthony <anthony at adsorbtion.org>
 // http://github.com/SirAnthony/element.js/
 /* jshint strict: true */
